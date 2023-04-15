@@ -1,8 +1,32 @@
 // Complete Events Exercise
 import * as http from "http"; //ES 6
 // const http = require("http");
+import EventEmitter from "events";
+import * as fs from "fs";
 
 const port = 3000;
+const eventEmitter = new EventEmitter();
+
+// Create an event handler
+const newsLetter = (signUpInfo) => {
+    console.log("Sign up info =", signUpInfo);
+    try {
+        fs.appendFile("signUpInfo.txt", `${signUpInfo.name},${signUpInfo.email}\n`, (err) => {
+            if(err) {
+                console.log("fs.append error =",err);
+            }
+            else {
+                console.log(signUpInfo,"saved successfully");
+            }
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+// Assign the event handler to the event
+eventEmitter.on("insert", newsLetter);
 
 const server = http.createServer((req, res) => {
 
@@ -19,15 +43,17 @@ const server = http.createServer((req, res) => {
                 reqBodyString = Buffer.concat(chunks).toString();
                 console.log(`Request Body String = ${reqBodyString}`);
                 reqBody = JSON.parse(reqBodyString);
-                console.log("Request Body =",reqBody);
+                console.log("Request Body =", reqBody);
                 res.writeHead(200, { "Content-Type": "application/json" })
-                res.write("{msg:Success!!}");
+                res.write(`{"msg":"Success!!"}`);
+                //res.write("{'msg':'success'}");
                 res.end();
+                eventEmitter.emit("insert", reqBody)
 
             } catch (error) {
-                console.log("Error =",error);
-                res.writeHead(404, { "Content-Type": "text/html" })
-                res.write("<h1>404 Page Not Found<h1>");
+                console.log("Error =", error);
+                res.writeHead(200, { "Content-Type": "application/json" })
+                res.write(`{"msg":"${error}"}`);
                 res.end();
             }
             res.end();
