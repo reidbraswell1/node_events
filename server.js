@@ -9,16 +9,35 @@ const server = http.createServer((req, res) => {
     const { url, method } = req;
     const chunks = [];
 
-    req.on("data", (chunk) => { chunks.push(chunk) })
+    // chunk is of type buffer
+    req.on("data", (chunk) => { chunks.push(chunk) });
+    req.on("end", () => {
+        if (url == "/newsletter_sign_up" && method == "POST") {
+            let reqBodyString;
+            let reqBody;
+            try {
+                reqBodyString = Buffer.concat(chunks).toString();
+                console.log(`Request Body String = ${reqBodyString}`);
+                reqBody = JSON.parse(reqBodyString);
+                console.log("Request Body =",reqBody);
+                res.writeHead(200, { "Content-Type": "application/json" })
+                res.write("{msg:Success!!}");
+                res.end();
 
-    if (url == "/newsletter_sign_up" && method == "POST") {
-
-    }
-    else {
-        res.writeHead(404, { "Content-Type": "text/html" })
-        res.write("<h1>404 Page Not Found<h1>");
-        res.end();
-    }
+            } catch (error) {
+                console.log("Error =",error);
+                res.writeHead(404, { "Content-Type": "text/html" })
+                res.write("<h1>404 Page Not Found<h1>");
+                res.end();
+            }
+            res.end();
+        }
+        else {
+            res.writeHead(404, { "Content-Type": "text/html" })
+            res.write("<h1>404 Page Not Found<h1>");
+            res.end();
+        }
+    });
 });
 
 
