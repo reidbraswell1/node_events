@@ -12,11 +12,11 @@ const newsLetter = (signUpInfo) => {
     console.log("Sign up info =", signUpInfo);
     try {
         fs.appendFile("signUpInfo.txt", `${signUpInfo.name},${signUpInfo.email}\n`, (err) => {
-            if(err) {
-                console.log("fs.append error =",err);
+            if (err) {
+                console.log("fs.append error =", err);
             }
             else {
-                console.log(signUpInfo,"saved successfully");
+                console.log(signUpInfo, "saved successfully");
             }
         });
     }
@@ -34,7 +34,7 @@ const server = http.createServer((req, res) => {
     const chunks = [];
 
     // chunk is of type buffer
-    req.on("data", (chunk) => { chunks.push(chunk) });
+    req.on("data", (chunk) => { chunks.push(chunk); });
     req.on("end", () => {
         if (url == "/newsletter_sign_up" && method == "POST") {
             let reqBodyString;
@@ -59,8 +59,18 @@ const server = http.createServer((req, res) => {
             res.end();
         }
         else {
-            res.writeHead(404, { "Content-Type": "text/html" })
-            res.write("<h1>404 Page Not Found<h1>");
+            res.writeHead(200, { "Content-Type": "text/html" })
+            res.write("<!DOCTYPE html>\
+                        <html>\
+                        <h1>Newsletter Signup<h1>\
+                        <form>\
+                            <label for='name'>Name</label>\
+                            <input id='name' type='text'/>\
+                            <br></br>\
+                            <label for='email'>Email</label>\
+                            <input type='email'/>\
+                        </form>\
+                        </html>");
             res.end();
         }
     });
