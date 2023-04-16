@@ -3,6 +3,7 @@ import * as http from "http"; //ES 6
 // const http = require("http");
 import EventEmitter from "events";
 import * as fs from "fs";
+import ejs from "ejs";
 
 const port = 3000;
 const eventEmitter = new EventEmitter();
@@ -32,7 +33,7 @@ const server = http.createServer((req, res) => {
 
     const { url, method } = req;
     const chunks = [];
-
+console.log("url=",url)
     // chunk is of type buffer
     req.on("data", (chunk) => { chunks.push(chunk); });
     req.on("end", () => {
@@ -60,21 +61,21 @@ const server = http.createServer((req, res) => {
         }
         else {
             res.writeHead(200, { "Content-Type": "text/html" })
-            res.write("<!DOCTYPE html>\
-                        <html>\
-                        <h1>Newsletter Signup<h1>\
-                        <form>\
-                            <label for='name'>Name</label>\
-                            <input id='name' type='text'/>\
-                            <br></br>\
-                            <label for='email'>Email</label>\
-                            <input type='email'/>\
-                        </form>\
-                        </html>");
+            renderHomepage(req, res)
             res.end();
         }
     });
 });
 
+// Render homepage
+function renderHomepage(req, res, data) {
+    console.log(`--- Begin Function homepage() ---`);
+    const htmlPage = "signUp.ejs";
+  
+    const template = fs.readFileSync(`./views/${htmlPage}`, "utf-8");
+    const renderedTemplate = ejs.render(template, { title: "Sign up Page" });
+    res.write(renderedTemplate);
+    console.log(`--- End Function homepage() ---`);
+  }
 
 server.listen(port, () => { console.log(`Server listening on port ${port}`) });
