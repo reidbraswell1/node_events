@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%=title%>
+    </title>
+    <link rel="stylesheet" href="/styles/errorStyle.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Error Page</h1>
+        <p class="error-message bold-second-word"><%=errMsg%></p>
+        <script>
+            let toBold = document.getElementsByClassName('bold-second-word');
+            for (var i = 0; i < toBold.length; ++i) {
+                boldSecondWord(toBold[i]);
+            }
+            function boldSecondWord(elem) {
+                const words = elem.innerHTML.split(" ");
+                console.log("Words = ",words)
+                const url = "<span style='color:red;font-weight:bold;'>" + words[1] + "</span>";
+                console.log(url);
+                const phrase = words.slice(2);
+                const sentence = words[0] + " " + url + " " + phrase.join(" "); 
+                elem.innerHTML = sentence;
+                console.log(sentence);
+            }
+        </script>
+    </div>
+</body>
+
+</html>
