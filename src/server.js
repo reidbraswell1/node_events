@@ -79,7 +79,9 @@ const server = http.createServer((req, res) => {
                         res.end();
                         break;
                     default:
-                        renderErrorPage(req, res)
+                        console.log(`--- Begin Case ${url} Route ---`);
+                        renderErrorPage(req, res, `URL ${url} ${req.method} method not allowed.`);
+                        console.log(`--- End Case ${url} Route ---`);
                         break;
                 }
                 break;
