@@ -15,14 +15,14 @@
     <div class="container">
         <h1>Newsletter Signup</h1>
         <div class="form-container">
-            <form action="/newsletter_sign_up" method="POST">
+            <form action="/newsletter_sign_up" method="POST" enctype="application/x-www-form-urlencoded">
                 <div class="input-name-container">
                     <label for='name'>Name</label>
-                    <input id='name' class='name-input' type='text' size="40" required>
+                    <input id='name' class='name-input' name="name" type='text' size="40" required>
                 </div>
                 <div class="input-email-container">
                     <label for='email'>Email</label>
-                    <input id='email' class='email-input' type='email' placeholder="youname@domain.com" pattern="^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$" size="30" required>
+                    <input id='email' class='email-input' name="email" type='email' placeholder="youname@domain.com" pattern="^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$" size="30" required>
                 </div>
                 <div class="submit-container">
                     <button class="submit-button" name="action" value="submit" type="submit">Submit</button>
