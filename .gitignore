@@ -1,2 +1,3 @@
 node_modules/
 signUpInfo.txt
+*.csv
