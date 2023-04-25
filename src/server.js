@@ -6,13 +6,16 @@ import * as fs from "fs";
 import ejs from "ejs";
 
 const port = 3000;
+const textFile = "newsletter.csv";
 const eventEmitter = new EventEmitter();
 
 // Create an event handler
 const newsLetter = (signUpInfo) => {
     console.log("Sign up info =", signUpInfo);
     try {
-        fs.appendFile("signUpInfo.txt", `${signUpInfo.name},${signUpInfo.email}\n`, (err) => {
+        fs.appendFileSync(textFile, `${signUpInfo.name},${signUpInfo.email}\n`);
+        /*
+        fs.appendFile(textFile, `${signUpInfo.name},${signUpInfo.email}\n`, (err) => {
             if (err) {
                 console.log("fs.append error =", err);
             }
@@ -20,6 +23,7 @@ const newsLetter = (signUpInfo) => {
                 console.log(signUpInfo, "saved successfully");
             }
         });
+        */
     }
     catch (error) {
         console.log(error);
@@ -38,7 +42,7 @@ const server = http.createServer((req, res) => {
     req.on("data", (chunk) => { chunks.push(chunk); });
     req.on("end", () => {
         switch (url) {
-            case "/":
+            case "/newsletter_sign_up":
                 console.log(`--- Begin Case ${url} Route ---`);
                 renderHomepage(req, res);
                 console.log(`--- End Case ${url} Route ---`);
@@ -48,15 +52,24 @@ const server = http.createServer((req, res) => {
                 signUpStyle(req, res);
                 console.log(`--- End Case ${url} Route ---`);
                 break;
+            case "/styles/resultsStyle.css":
+                console.log(`--- Begin Case ${url} Route ---`);
+                resultsStyle(req, res);
+                console.log(`--- End Case ${url} Route ---`);
                 break;
             case "/styles/errorStyle.css":
                 console.log(`--- Begin Case ${url} Route ---`);
                 errorStyle(req, res);
                 console.log(`--- End Case ${url} Route ---`);
                 break;
-            case "/newsletter_sign_up":
+            case "/process_newsletter_sign_up":
                 switch (method) {
                     case "POST":
+                        console.log("Chunks = ", chunks.toLocaleString())
+                        processPostRequest(req, res, chunks.toString());
+                        renderResultsPage(req, res);
+                        console.log("After Results Page");
+                        /*
                         let reqBodyString;
                         let reqBody;
                         try {
@@ -77,6 +90,7 @@ const server = http.createServer((req, res) => {
                             res.end();
                         }
                         res.end();
+                        break; */
                         break;
                     default:
                         console.log(`--- Begin Case ${url} Route ---`);
@@ -86,7 +100,7 @@ const server = http.createServer((req, res) => {
                 }
                 break;
             default:
-                renderErrorPage(req,res, `URL ${url} not found on this server`);
+                renderErrorPage(req, res, `URL ${url} not found on this server`);
                 break;
         }
         res.end();
@@ -96,9 +110,9 @@ const server = http.createServer((req, res) => {
 // Process a POST request
 const processPostRequest = (req, res, body) => {
     console.log(`--- Begin function processPostRequest() ---`);
-    console.log(`body = ${body}`);
+    console.log("Body = ", body);
     const params = new URLSearchParams(`?${body}`);
-    console.log(params);
+    console.log("Post Params = ", params);
     // Redirect to index page if no parameters
     if (!params.has("name") ||
         !params.has("email")) {
@@ -108,7 +122,7 @@ const processPostRequest = (req, res, body) => {
         });
         return;
     }
-    res.writeHead(200, { "Content-Type": "application/json " });
+    //res.writeHead(200, { "Content-Type": "application/json " });
     let responseObject = {};
 
     for (let pair of params.entries()) {
@@ -119,7 +133,9 @@ const processPostRequest = (req, res, body) => {
             responseObject[`${pair[0]}`] = pair[1].split(",").map((str) => str.trim());
         }
     }
-    res.write(JSON.stringify(responseObject));
+    console.log("Response Object = ", responseObject);
+    eventEmitter.emit("insert", responseObject)
+    //res.write(JSON.stringify(responseObject));
     console.log(`--- End function processPostRequest() ---`);
 }
 
@@ -130,16 +146,16 @@ const signUpStyle = (req, res) => {
     console.log(`--- Begin Function signUpStyle() ---`);
     const styleSheetDirectory = "./styles/";
     const styleSheet = "signUpStyle.css";
-  
+
     let fileStream = fs.createReadStream(
-      `${styleSheetDirectory}${styleSheet}`,
-      "utf-8"
+        `${styleSheetDirectory}${styleSheet}`,
+        "utf-8"
     );
     let css = fs.readFileSync(`${styleSheetDirectory}${styleSheet}`, "utf-8");
     res.writeHead(200, { "Content-Type": "text/css" });
     res.write(css);
     console.log(`--- End Function signUpStyle() ---`);
-  }
+}
 
 // Render homepage
 const renderHomepage = (req, res, data) => {
@@ -158,24 +174,75 @@ const renderHomepage = (req, res, data) => {
     console.log(`--- End Function homepage() ---`);
 }
 
+// Serve stylesheet information for results page
+const resultsStyle = (req, res) => {
+    console.log(`--- Begin Function resultsStyle() ---`);
+    const styleSheetDirectory = "./styles/";
+    const styleSheet = "resultsStyle.css";
+
+    let fileStream = fs.createReadStream(
+        `${styleSheetDirectory}${styleSheet}`,
+        "utf-8"
+    );
+    let css = fs.readFileSync(`${styleSheetDirectory}${styleSheet}`, "utf-8");
+    res.writeHead(200, { "Content-Type": "text/css" });
+    res.write(css);
+    console.log(`--- End Function resultsStyle() ---`);
+}
+// Render resultsPage
+const renderResultsPage = (req, res, data) => {
+    console.log(`--- Begin Function homepage() ---`);
+    const htmlPage = "results.ejs";
+
+    try {
+        const template = fs.readFileSync(`./views/${htmlPage}`, "utf-8");
+        const data = fs.readFileSync(textFile,{encoding:'utf8', flag:'r'});
+        console.log("Data = ", data.toString());
+        let records = data.toString().trim().split("\n");
+        console.log("Records = ", records);
+        const renderedTemplate = ejs.render(template, { title: "Results Page", tableData: records });
+        res.write(renderedTemplate);
+        res.end();
+        /*
+            if (err) {
+                console.log("Error = ", err)
+            }
+            else {
+                let records = data.toString().split("\n");
+                console.log("Data Records = ", records);
+                const renderedTemplate = ejs.render(template, { title: "Results Page", tableData: records });
+                console.log(renderedTemplate)
+                res.write(renderedTemplate);
+                res.end();
+            }
+        })
+        */
+    }
+    catch (error) {
+        console.log("Error", error);
+    }
+    console.log(`--- End Function resultspage() ---`);
+}
+
 // Serve stylesheet information for error page
 const errorStyle = (req, res) => {
     console.log(`--- Begin Function errorStyle() ---`);
     const styleSheetDirectory = "./styles/";
     const styleSheet = "errorStyle.css";
-  
+
     let fileStream = fs.createReadStream(
-      `${styleSheetDirectory}${styleSheet}`,
-      "utf-8"
+        `${styleSheetDirectory}${styleSheet}`,
+        "utf-8"
     );
     let css = fs.readFileSync(`${styleSheetDirectory}${styleSheet}`, "utf-8");
     res.writeHead(200, { "Content-Type": "text/css" });
     res.write(css);
     console.log(`--- End Function oopsStyle() ---`);
-  }
+}
+
 
 // Render an error page
-function renderErrorPage(req, res, errMsg) {
+const renderErrorPage = (req, res, errMsg) => {
     console.log(`--- Begin Function renderErrorPage() ---`);
     const htmlPage = "error.ejs";
 
