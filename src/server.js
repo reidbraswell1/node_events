@@ -4,6 +4,7 @@ import * as http from "http"; //ES 6
 import EventEmitter from "events";
 import * as fs from "fs";
 import ejs from "ejs";
+import { exit } from "process";
 
 const port = 3000;
 const textFile = "newsletter.csv";
@@ -13,17 +14,8 @@ const eventEmitter = new EventEmitter();
 const newsLetter = (signUpInfo) => {
     console.log("Sign up info =", signUpInfo);
     try {
+        // Using the sync version so the file can be re-read for html display
         fs.appendFileSync(textFile, `${signUpInfo.name},${signUpInfo.email}\n`);
-        /*
-        fs.appendFile(textFile, `${signUpInfo.name},${signUpInfo.email}\n`, (err) => {
-            if (err) {
-                console.log("fs.append error =", err);
-            }
-            else {
-                console.log(signUpInfo, "saved successfully");
-            }
-        });
-        */
     }
     catch (error) {
         console.log(error);
@@ -42,9 +34,31 @@ const server = http.createServer((req, res) => {
     req.on("data", (chunk) => { chunks.push(chunk); });
     req.on("end", () => {
         switch (url) {
-            case "/newsletter_sign_up":
+            case "/newsletter_signup":
                 console.log(`--- Begin Case ${url} Route ---`);
-                renderHomepage(req, res);
+                renderSignUpPage(req, res);
+                console.log(`--- End Case ${url} Route ---`);
+                break;
+            case "/api/newsletter_signup":
+                console.log(`--- Begin Case ${url} Route ---`);
+                let newsLetterSignUpText = Buffer.concat(chunks).toString().replace(/[\n\r]+/g, '').replace(/\s{2,10}/g, '');
+                //let newsLetterSignUpText = Buffer.concat(chunks).toString();
+                newsLetterSignUpText= Buffer.concat(chunks).toString();
+                let newsLetterJSON;
+                try {
+                    console.log("Newsletter Sign Up Text", newsLetterSignUpText);
+                    newsLetterJSON = JSON.parse(newsLetterSignUpText);
+                    console.log("NewsLetterJSON =", newsLetterJSON);
+                    res.writeHead(200);
+                    let successMsg = "{success:".concat(JSON.stringify(newsLetterJSON).concat("}"));
+                    res.write(successMsg);
+
+                }
+                catch (error) {
+                    console.log(error);
+                    res.writeHead(400);
+                    res.write("{failure:{".concat('"').concat(error.toString()).concat('"').concat("}"));
+                }
                 console.log(`--- End Case ${url} Route ---`);
                 break;
             case "/styles/signUpStyle.css":
@@ -62,35 +76,11 @@ const server = http.createServer((req, res) => {
                 errorStyle(req, res);
                 console.log(`--- End Case ${url} Route ---`);
                 break;
-            case "/process_newsletter_sign_up":
+            case "/process_newsletter_signup":
                 switch (method) {
                     case "POST":
-                        console.log("Chunks = ", chunks.toLocaleString())
-                        processPostRequest(req, res, chunks.toString());
-                        renderResultsPage(req, res);
-                        console.log("After Results Page");
-                        /*
-                        let reqBodyString;
-                        let reqBody;
-                        try {
-                            reqBodyString = Buffer.concat(chunks).toString();
-                            console.log(`Request Body String = ${reqBodyString}`);
-                            reqBody = JSON.parse(reqBodyString);
-                            console.log("Request Body =", reqBody);
-                            res.writeHead(200, { "Content-Type": "application/json" })
-                            res.write(`{"msg":"Success!!"}`);
-                            //res.write("{'msg':'success'}");
-                            res.end();
-                            eventEmitter.emit("insert", reqBody)
-
-                        } catch (error) {
-                            console.log("Error =", error);
-                            res.writeHead(200, { "Content-Type": "application/json" })
-                            res.write(`{"msg":"${error}"}`);
-                            res.end();
-                        }
-                        res.end();
-                        break; */
+                        console.log("Chunks = ", Buffer.concat(chunks).toString())
+                        processPostRequest(req, res, Buffer.concat(chunks).toString());
                         break;
                     default:
                         console.log(`--- Begin Case ${url} Route ---`);
@@ -134,8 +124,8 @@ const processPostRequest = (req, res, body) => {
         }
     }
     console.log("Response Object = ", responseObject);
-    eventEmitter.emit("insert", responseObject)
-    //res.write(JSON.stringify(responseObject));
+    eventEmitter.emit("insert", responseObject);
+    renderResultsPage(req, res, responseObject);
     console.log(`--- End function processPostRequest() ---`);
 }
 
@@ -157,9 +147,9 @@ const signUpStyle = (req, res) => {
     console.log(`--- End Function signUpStyle() ---`);
 }
 
-// Render homepage
-const renderHomepage = (req, res, data) => {
-    console.log(`--- Begin Function homepage() ---`);
+// Render sign up page
+const renderSignUpPage = (req, res, data) => {
+    console.log(`--- Begin Function signUpPage() ---`);
     const htmlPage = "signUp.ejs";
 
     try {
@@ -171,7 +161,7 @@ const renderHomepage = (req, res, data) => {
     catch (error) {
         console.log("Error", error);
     }
-    console.log(`--- End Function homepage() ---`);
+    console.log(`--- End Function signUpPage() ---`);
 }
 
 // Serve stylesheet information for results page
@@ -189,34 +179,22 @@ const resultsStyle = (req, res) => {
     res.write(css);
     console.log(`--- End Function resultsStyle() ---`);
 }
-// Render resultsPage
+
+// Render results page
 const renderResultsPage = (req, res, data) => {
-    console.log(`--- Begin Function homepage() ---`);
+    console.log(`--- Begin Function resultspage() ---`);
     const htmlPage = "results.ejs";
 
     try {
         const template = fs.readFileSync(`./views/${htmlPage}`, "utf-8");
-        const data = fs.readFileSync(textFile,{encoding:'utf8', flag:'r'});
-        console.log("Data = ", data.toString());
-        let records = data.toString().trim().split("\n");
-        console.log("Records = ", records);
+        const data = fs.readFileSync(textFile, { encoding: 'utf8', flag: 'r' });
+        console.log("Data = ", data);
+        // Eliminate end of line from last record
+        const records = data.trim().split("\n");
         const renderedTemplate = ejs.render(template, { title: "Results Page", tableData: records });
         res.write(renderedTemplate);
         res.end();
-        /*
-            if (err) {
-                console.log("Error = ", err)
-            }
-            else {
-                let records = data.toString().split("\n");
-                console.log("Data Records = ", records);
-                const renderedTemplate = ejs.render(template, { title: "Results Page", tableData: records });
-                console.log(renderedTemplate)
-                res.write(renderedTemplate);
-                res.end();
-            }
-        })
-        */
+
     }
     catch (error) {
         console.log("Error", error);
