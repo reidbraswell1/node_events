@@ -1,0 +1,107 @@
+{
+	"info": {
+		"_postman_id": "6d944ce9-9823-454d-b1e2-5dd499fdf079",
+		"name": "node_events",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18759255"
+	},
+	"item": [
+		{
+			"name": "GET",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/newsletter_sign_up",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"newsletter_sign_up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/newsletter_signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "localhost:3000/newsletter_signup",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"newsletter_signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/process_newsletter_signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "Sam Jones",
+							"description": "\n",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "sam@uab.com",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/process_newsletter_signup",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"process_newsletter_signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:/api/newsletter_signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Quincy Adams IV\",\n    \"email\": \"qadams@yahoo.net\"\n}"
+				},
+				"url": {
+					"raw": "localhost:3000/api/newsletter_signup",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"newsletter_signup"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
