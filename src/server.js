@@ -40,24 +40,31 @@ const server = http.createServer((req, res) => {
                 console.log(`--- End Case ${url} Route ---`);
                 break;
             case "/api/newsletter_signup":
-                console.log(`--- Begin Case ${url} Route ---`);
-                let newsLetterSignUpText = Buffer.concat(chunks).toString().replace(/[\n\r]+/g, '').replace(/\s{2,10}/g, '');
-                //let newsLetterSignUpText = Buffer.concat(chunks).toString();
-                newsLetterSignUpText= Buffer.concat(chunks).toString();
-                let newsLetterJSON;
-                try {
-                    console.log("Newsletter Sign Up Text", newsLetterSignUpText);
-                    newsLetterJSON = JSON.parse(newsLetterSignUpText);
-                    console.log("NewsLetterJSON =", newsLetterJSON);
-                    res.writeHead(200);
-                    let successMsg = "{success:".concat(JSON.stringify(newsLetterJSON).concat("}"));
-                    res.write(successMsg);
+                if (req.method == "POST") {
+                    console.log(`--- Begin Case ${url} Route ---`);
+                    let newsLetterSignUpText = Buffer.concat(chunks).toString().replace(/[\n\r]+/g, '').replace(/\s{2,10}/g, '');
+                    //let newsLetterSignUpText = Buffer.concat(chunks).toString();
+                    newsLetterSignUpText = Buffer.concat(chunks).toString();
+                    let newsLetterJSON;
+                    try {
+                        console.log("Newsletter Sign Up Text", newsLetterSignUpText);
+                        newsLetterJSON = JSON.parse(newsLetterSignUpText);
+                        console.log("NewsLetterJSON =", newsLetterJSON);
+                        eventEmitter.emit("insert", newsLetterJSON);
+                        res.writeHead(200);
+                        let successMsg = "{success:".concat(JSON.stringify(newsLetterJSON).concat("}"));
+                        res.write(successMsg);
 
+                    }
+                    catch (error) {
+                        console.log(error);
+                        res.writeHead(400);
+                        res.write("{failure:{".concat('"').concat(error.toString()).concat('"').concat("}"));
+                    }
                 }
-                catch (error) {
-                    console.log(error);
+                else {
                     res.writeHead(400);
-                    res.write("{failure:{".concat('"').concat(error.toString()).concat('"').concat("}"));
+                    res.write("{failure:{".concat('"This URL ' + req.url + ' requires POST"').concat("}"));    
                 }
                 console.log(`--- End Case ${url} Route ---`);
                 break;
