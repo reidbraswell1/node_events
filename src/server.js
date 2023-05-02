@@ -51,22 +51,55 @@ const server = http.createServer((req, res) => {
                         newsLetterJSON = JSON.parse(newsLetterSignUpText);
                         console.log("NewsLetterJSON =", newsLetterJSON);
                         eventEmitter.emit("insert", newsLetterJSON);
-                        res.writeHead(200);
-                        let successMsg = "{success:".concat(JSON.stringify(newsLetterJSON).concat("}"));
-                        res.write(successMsg);
-
+                        res.writeHead(200, { "Content-type": "application/json" });
+                        let successMsg = `{"success": ${JSON.stringify(newsLetterJSON)}}`;
+                        res.write(JSON.stringify(JSON.parse(successMsg)));
                     }
                     catch (error) {
                         console.log(error);
-                        res.writeHead(400);
-                        res.write("{failure:{".concat('"').concat(error.toString()).concat('"').concat("}"));
+                        const errorMsg = `{"failure":"${error.toString()}"}`;
+                        console.log(errorMsg);
+                        res.writeHead(400, { "Content-type": "application/json" });
+                        res.write(JSON.stringify(JSON.parse(errorMsg)));
                     }
                 }
-                else {
-                    res.writeHead(400);
-                    res.write("{failure:{".concat('"This URL ' + req.url + ' requires POST"').concat("}"));    
-                }
+                else
+                    try {
+                        let msg = `{ "failure" : "This URL ${req.url} requires POST" }`;
+                        res.writeHead(400, { "Content-type": "application/json" });
+                        res.write(JSON.stringify(JSON.parse(msg)));
+
+                    }
+                    catch (error) {
+                        console.log("Error = ", error);
+                    }
                 console.log(`--- End Case ${url} Route ---`);
+                break;
+            case "/api/results":
+                console.log(`--- Begin Case ${url} Route ---`);
+                try {
+                    const data = fs.readFileSync(textFile, { encoding: 'utf8', flag: 'r' });
+                    console.log("Data = ", data);
+                    // Eliminate end of line from last record
+                    const records = data.trim().split("\n");
+                    let resultObj = [];
+                    for (var i = 0; i < records.length; ++i) {
+                        console.log("here");
+                        let objNameProp = `{"name":`;
+                        let objEmailProp = `"email":`;
+                        let name = `"${records[i].split(",")[0]}",`;
+                        let email = `"${records[i].split(",")[1]}"}`;
+                        let obj = `${objNameProp}${name}${objEmailProp}${email}`
+                        resultObj.push(obj);
+                        console.log(resultObj);
+                    }
+                    console.log("Result Obj =", resultObj);
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.write(`[${resultObj.toString()}]`);
+                }
+                catch (error) {
+                    console.log(error);
+                }
                 break;
             case "/styles/signUpStyle.css":
                 console.log(`--- Begin Case ${url} Route ---`);
