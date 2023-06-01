@@ -31,3 +31,7 @@
     background-color: #04AA6D;
     color: white;
 }
+
+.footer p {
+    text-decoration: underline;
+}

@@ -38,3 +38,13 @@
     border-radius: 1rem;
     margin-top: 1rem;
 }
+
+.footer {
+    display: flex;
+    margin-top: 3rem;
+    justify-content: center;
+}
+
+.footer p {
+    text-decoration: underline;
+}
