@@ -46,6 +46,7 @@ const server = http.createServer((req, res) => {
                     //let newsLetterSignUpText = Buffer.concat(chunks).toString();
                     newsLetterSignUpText = Buffer.concat(chunks).toString();
                     let newsLetterJSON;
+                    // Parse text to make sure we have valid JSON
                     try {
                         console.log("Newsletter Sign Up Text", newsLetterSignUpText);
                         newsLetterJSON = JSON.parse(newsLetterSignUpText);
@@ -84,14 +85,13 @@ const server = http.createServer((req, res) => {
                     const records = data.trim().split("\n");
                     let resultObj = [];
                     for (var i = 0; i < records.length; ++i) {
-                        console.log("here");
                         let objNameProp = `{"name":`;
                         let objEmailProp = `"email":`;
                         let name = `"${records[i].split(",")[0]}",`;
                         let email = `"${records[i].split(",")[1]}"}`;
                         let obj = `${objNameProp}${name}${objEmailProp}${email}`
                         resultObj.push(obj);
-                        console.log(resultObj);
+                        console.log("Current Object =",obj);
                     }
                     console.log("Result Obj =", resultObj);
                     res.writeHead(200, { "Content-Type": "application/json" });
@@ -121,6 +121,7 @@ const server = http.createServer((req, res) => {
                     case "POST":
                         console.log("Chunks = ", Buffer.concat(chunks).toString())
                         processPostRequest(req, res, Buffer.concat(chunks).toString());
+                        console.log(`--- End Case ${url} Route ---`);
                         break;
                     default:
                         console.log(`--- Begin Case ${url} Route ---`);
@@ -130,6 +131,7 @@ const server = http.createServer((req, res) => {
                 }
                 break;
             default:
+                console.log(`--- Begin Case ${url} Route ---`);
                 renderErrorPage(req, res, `URL ${url} not found on this server`);
                 break;
         }
@@ -195,7 +197,6 @@ const renderSignUpPage = (req, res, data) => {
     try {
         const template = fs.readFileSync(`./views/${htmlPage}`, "utf-8");
         const renderedTemplate = ejs.render(template, { title: "Sign up Page" });
-        console.log(renderedTemplate)
         res.write(renderedTemplate);
     }
     catch (error) {
