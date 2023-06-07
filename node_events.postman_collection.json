@@ -87,8 +87,46 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Quincy Adams IV\",\n    \"email\": \"qadams@yahoo.net\"\n}"
+					"raw": "{\n    \"name\": \"Quincy Adams III\",\n    \"email\": \"qadams@yahoo.net\"\n}"
 				},
+				"url": {
+					"raw": "localhost:3000/api/newsletter_signup",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"newsletter_signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/api/results",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/results",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"results"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/api/newsletter_signup",
+			"request": {
+				"method": "GET",
+				"header": [],
 				"url": {
 					"raw": "localhost:3000/api/newsletter_signup",
 					"host": [
