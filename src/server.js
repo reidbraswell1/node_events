@@ -99,6 +99,8 @@ const server = http.createServer((req, res) => {
                 }
                 catch (error) {
                     console.log(error);
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.write(`{"error":"${error.toString()}"}`);
                 }
                 break;
             case "/styles/signUpStyle.css":
