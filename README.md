@@ -1,5 +1,14 @@
 # Node.js Events Exercise
 
+### SignUp Page
+![Sign Up Page](SignUpPage.png)
+
+### Results Page 
+![Results Page](ResultsPage.png)
+
+### Error Page
+![ErrorPage](ErrorPage.png)
+
 ## Exercise:
 
 ### Objectives
